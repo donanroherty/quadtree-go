@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Go Quadtree</title>
+  </head>
+  <body>
+    <style>
+      body,
+      html {
+        margin: 0;
+        border: none;
+        padding: none;
+      }
+      .app {
+        display: flex;
+      }
+      .qt_cvs {
+        border: 1px solid #484848;
+        cursor: crosshair;
+      }
+      .qt_toolbar {
+        background-color: #484848;
+        outline: 1px solid #484848;
+      }
+      .toolbar {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .btn {
+        background-color: #c2c2c2;
+        color: #484848;
+        border: 1px solid #484848;
+        padding: 10px;
+        margin: 10px;
+        cursor: pointer;
+      }
+    </style>
+
+    <div class="app">
+      <canvas id="qt_cvs" class="qt_cvs" width="640" height="480"></canvas>
+      <div class="toolbar">
+        <button class="btn" onclick="clearPts()">Clear points</button>
+      </div>
+    </div>
+
+    <script src="./lib/wasm_exec.js"></script>
+
+    <script>
+      // get query string
+      const qs = new URLSearchParams(window.location.search)
+      const params = Object.fromEntries(qs.entries())
+      const demoQuery = typeof params.demoQuery !== "undefined"
+      const pts = parseInt(params.pts || 50)
+      const width = parseInt(params.width || 480)
+      const height = parseInt(params.height || 480)
+
+      loadQuadtreeDemo()
+
+      async function loadQuadtreeDemo() {
+        const go = new Go()
+        const WASM_URL = "./bin/quadtree-demo.wasm"
+
+        const obj = await WebAssembly.instantiateStreaming(fetch(WASM_URL), go.importObject)
+        go.run(obj.instance).then(() => console.log("WASM has closed"))
+
+        const canvas = document.getElementById("qt_cvs")
+        window.initQuadtreeDemo(canvas, width, height, demoQuery, pts)
+      }
+    </script>
+  </body>
+</html>
